@@ -1,4 +1,13 @@
 A modern task management app built with Node.js (Express) + Firebase Realtime Database for the backend and React (Vite) for the frontend.
+## 📸 Screenshot
+
+![Screenshot](./frontend/task-management/public/image1.png)
+![Screenshot](./frontend/task-management/public/image2.png)
+![Screenshot](./frontend/task-management/public/image3.png)
+![Screenshot](./frontend/task-management/public/image4.png)
+![Screenshot](./frontend/task-management/public/image5.png)
+![Screenshot](./frontend/task-management/public/image6.png)
+
 📂 Project structure
 project
 ├── backend                # Node.js + Express + Firebase
@@ -80,11 +89,3 @@ Frontend: React, Vite, Tailwind CSS
 
 Others: Nodemailer, Twilio
 
-## 📸 Screenshot
-
-![Screenshot](./frontend/task-management/public/image1.png)
-![Screenshot](./frontend/task-management/public/image2.png)
-![Screenshot](./frontend/task-management/public/image3.png)
-![Screenshot](./frontend/task-management/public/image4.png)
-![Screenshot](./frontend/task-management/public/image5.png)
-![Screenshot](./frontend/task-management/public/image6.png)
