@@ -1,8 +1,8 @@
 A modern task management app built with Node.js (Express) + Firebase Realtime Database for the backend and React (Vite) for the frontend.
-
+📂 Project structure
 project
-├── backend                 # Node.js + Express + Firebase
-│   ├── config              # Firebase & DB configuration
+├── backend                # Node.js + Express + Firebase
+│   ├── config             # Firebase & DB configuration
 │   ├── controllers        # Route controllers
 │   ├── middlewares        # Custom middlewares
 │   ├── models             # Data models
@@ -12,19 +12,21 @@ project
 │   ├── .env.example       # Example environment config
 │   ├── .gitignore
 │   └── server.js
-└── frontend                # React (Vite)
-    ├── public
-    ├── src
-    │   ├── assets
-    │   ├── components
-    │   ├── contexts
-    │   ├── hooks
-    │   ├── pages
-    │   ├── routes
-    │   └── utils
-    ├── .gitignore
-    ├── index.html
-    └── vite.config.js
+├── frontend               # React (Vite)
+│   ├── public
+│   ├── src
+│   │   ├── assets
+│   │   ├── components
+│   │   ├── contexts
+│   │   ├── hooks
+│   │   ├── pages
+│   │   ├── routes
+│   │   └── utils
+│   ├── .gitignore
+│   ├── index.html
+│   └── vite.config.js
+└── README.md
+
 🚀 Features
 * Login & signup with invite codes or email code verification
 
