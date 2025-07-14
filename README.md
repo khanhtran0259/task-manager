@@ -82,6 +82,9 @@ Others: Nodemailer, Twilio
 
 ## 📸 Screenshot
 
-![Screenshot](./frontend/task-management/public/image.png)
 ![Screenshot](./frontend/task-management/public/image1.png)
 ![Screenshot](./frontend/task-management/public/image2.png)
+![Screenshot](./frontend/task-management/public/image3.png)
+![Screenshot](./frontend/task-management/public/image4.png)
+![Screenshot](./frontend/task-management/public/image5.png)
+![Screenshot](./frontend/task-management/public/image6.png)
