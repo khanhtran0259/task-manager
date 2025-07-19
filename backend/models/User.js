@@ -15,6 +15,13 @@ class User {
 
       }
 
+      static async findAll() {
+            const snapshot = await db.ref('users').once('value');
+            if (!snapshot.exists()) return [];
+            const data = snapshot.val();
+            return Object.entries(data).map(([id, user]) => ({ id, ...user }));
+      }
+
       static async findById(id) {
             const snapshot = await db.ref(`users/${id}`).once('value');
             if (!snapshot.exists()) return null;

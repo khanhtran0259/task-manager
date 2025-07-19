@@ -12,6 +12,8 @@ import UserTasks from './pages/User/UserTasks';
 import TaskDetails from './pages/User/TaskDetails';
 import UserProvider, { UserContext } from './contexts/UserContext';
 import LoginAdmin from './pages/Auth/LoginAdmin';
+import { Toaster } from 'react-hot-toast';
+import Chat from './pages/chat/Chat'
 const App = () => {
   return (
     <UserProvider>
@@ -35,13 +37,24 @@ const App = () => {
           <Route element={<PrivateRoute allowedRoles={['admin']} />}>
             <Route path='/user/dashboard' element={<UserDashboard />} />
             <Route path='/user/my-tasks' element={<UserTasks />} />
-            <Route path='/user/task-details/:taskId' element={<TaskDetails />} />
+            <Route path='/user/task-details/:id' element={<TaskDetails />} />
           </Route>
-
+            
+            <Route element={<PrivateRoute allowedRoles={['admin', 'member']} />}>
+              <Route path='/message' element={<Chat />} />
+            </Route>
         <Route path="/" element={<Root />}/>
         </Routes>
       </Router>
     </div>
+    <Toaster 
+      toastOptions={{
+        className: "",
+        style: {
+          fontSize: "13px"
+        },
+      }}  
+      />
     </UserProvider>
   )
 }

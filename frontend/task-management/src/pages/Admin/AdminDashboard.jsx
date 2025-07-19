@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { useUserAuth } from '../../hooks/useUserAuth'
 import { UserContext } from '../../contexts/UserContext'
-import DashboradLayout from '../../components/layouts/DashboradLayout'
+import DashboradLayout from '../../components/layouts/DashboardLayout'
 import { useNavigate } from 'react-router-dom'
 import axiosInstance from '../../utils/axiosInstance'
 import { API_PATHS } from '../../utils/apiPath'
@@ -55,7 +55,7 @@ const AdminDashboard = () => {
     }
   }
   const onSeeMore = () => {
-    navigate('/admin/tasks')
+    navigate('/admin/manage-tasks')
   }
   useEffect(() => {
     getDashboardData()

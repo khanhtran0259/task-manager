@@ -1,5 +1,6 @@
 const Task = require('../models/Task');
 const User = require('../models/User');
+const moment = require('moment');
 
 const getTasks = async (req, res) => {
       try {
@@ -8,31 +9,33 @@ const getTasks = async (req, res) => {
             if (status) {
                   filter.status = status;
             }
-
-            let tasks;
-            if (req.user.role === 'admin') {
-                  tasks = await Task.findAll();
-            } else {
-                  tasks = (await Task.findAll()).filter(task =>
+            let tasks = req.user.role === 'admin'
+                  ? await Task.findAll()
+                  : (await Task.findAll()).filter(task =>
                         task.assignedTo?.includes?.(req.user.id)
                   );
-            }
-
+            const statusSummary = {
+                  allTasks: tasks.length,
+                  pendingTasks: tasks.filter(task => task.status === "Pending").length,
+                  inProgressTasks: tasks.filter(task => task.status === "In Progress").length,
+                  completedTasks: tasks.filter(task => task.status === "Completed").length
+            };
             if (filter.status) {
                   tasks = tasks.filter(task => task.status === filter.status);
             }
-
             tasks = await Promise.all(
                   tasks.map(async (task) => {
                         const populatedAssignedTo = await Promise.all(
                               (task.assignedTo || []).map(async userId => {
                                     const user = await User.findById(userId);
-                                    return user ? {
-                                          id: user.id,
-                                          name: user.name,
-                                          email: user.email,
-                                          profileImageUrl: user.imageUrl || null
-                                    } : null;
+                                    return user
+                                          ? {
+                                                id: user.id,
+                                                name: user.name,
+                                                email: user.email,
+                                                profileImageUrl: user.imageUrl || null
+                                          }
+                                          : null;
                               })
                         );
 
@@ -46,19 +49,9 @@ const getTasks = async (req, res) => {
                   })
             );
 
-            const allTasks = tasks.length;
-            const pendingTasks = tasks.filter(task => task.status === "Pending").length;
-            const inProgressTasks = tasks.filter(task => task.status === "In Progress").length;
-            const completedTasks = tasks.filter(task => task.status === "Completed").length;
-
             res.status(200).json({
                   tasks,
-                  statusSummary: {
-                        allTasks,
-                        pendingTasks,
-                        inProgressTasks,
-                        completedTasks
-                  }
+                  statusSummary
             });
 
       } catch (error) {
@@ -101,7 +94,7 @@ const getTaskById = async (req, res) => {
 const createTask = async (req, res) => {
 
       try {
-            const { title, description, priority, dueDate, createdAt,status, assignedTo = [], attachments = [], todoChecklist = [] } = req.body;
+            const { title, description, priority, dueDate, createdAt, status, assignedTo = [], attachments = [], todoChecklist = [] } = req.body;
 
             if (!Array.isArray(assignedTo)) {
                   return res.status(400).json({ message: "AssignedTo must be an array of user ids" });
@@ -174,25 +167,31 @@ const updateTaskStatus = async (req, res) => {
             if (!task) {
                   return res.status(404).json({ message: "Task not found" });
             }
-            const isAssignedToUser = task.assignedTo.some((userId) => userId.toString() === req.user.id.toString());
-            if (!isAssignedToUser && req.user.role !== 'admin') {
+            const isAssignedToUser = task.assignedTo?.some(
+                  (userId) => userId.toString() === req.user.id.toString()
+            );
+            const isAdmin = req.user.role === 'admin';
+
+            if (!isAssignedToUser && !isAdmin) {
                   return res.status(403).json({ message: "You are not authorized to update this task" });
             }
+
             task.status = req.body.status || task.status;
+
             if (task.status === 'Completed') {
                   task.todoChecklist.forEach(item => {
                         item.completed = true;
                   });
                   task.progress = 100;
             }
+
             await Task.update(req.params.id, task);
             res.status(200).json({ message: "Task status updated successfully", task });
       } catch (error) {
             console.error("Error updating task status:", error);
             res.status(500).json({ message: "Error updating task status" });
-
       }
-}
+};
 const updateTaskTodo = async (req, res) => {
       try {
             const { todoChecklist } = req.body;
@@ -200,7 +199,12 @@ const updateTaskTodo = async (req, res) => {
             if (!task) {
                   return res.status(404).json({ message: "Task not found" });
             }
-            if (!task.assignedTo.includes(req.user.id) && req.user.role !== 'admin') {
+            const isAssignedToUser = task.assignedTo?.some(
+                  (userId) => userId.toString() === req.user.id.toString()
+            );
+            const isAdmin = req.user.role === 'admin';
+
+            if (!isAssignedToUser && !isAdmin) {
                   return res.status(403).json({ message: "You are not authorized to update this task" });
             }
 
@@ -208,10 +212,10 @@ const updateTaskTodo = async (req, res) => {
             const completedCount = task.todoChecklist.filter(item => item.completed).length;
             const totalItems = task.todoChecklist.length;
             task.progress = totalItems > 0 ? Math.round((completedCount / totalItems) * 100) : 0;
+
             if (task.progress === 100) {
                   task.status = 'Completed';
-            }
-            else if (task.progress > 0) {
+            } else if (task.progress > 0) {
                   task.status = 'In Progress';
             } else {
                   task.status = 'Pending';
@@ -222,13 +226,13 @@ const updateTaskTodo = async (req, res) => {
             const assignedUsers = await Promise.all(
                   task.assignedTo.map(userId => User.findById(userId))
             );
+
             res.status(200).json({ message: "Task todo updated successfully", ...updatedTask, assignedUsers });
       } catch (error) {
             console.error("Error updating task todo:", error);
             res.status(500).json({ message: "Error updating task todo" });
-
       }
-}
+};
 
 const getDashboardData = async (req, res) => {
       try {
@@ -299,23 +303,54 @@ const getDashboardData = async (req, res) => {
 const getUserDashboardData = async (req, res) => {
       try {
             const userId = req.user.id;
-
-            const tasks = await Task.findAll(); // Lấy tất cả task từ Firebase
-            const userTasks = tasks.filter(task => task.assignedTo?.includes(userId));
-
-            const totalTasks = userTasks.length;
-            const completedTasks = userTasks.filter(task => task.status === 'Completed').length;
-            const pendingTasks = userTasks.filter(task => task.status === 'Pending').length;
-            const inProgressTasks = userTasks.filter(task => task.status === 'In Progress').length;
+            const allTasks = await Task.findAll();
+            const userTasks = allTasks.filter(task =>
+                  task.assignedTo?.includes(userId)
+            );
 
             const now = new Date();
-            const overdueTasks = userTasks.filter(task =>
-                  task.status !== 'Completed' && new Date(task.dueDate) < now
-            ).length;
 
-            const recentTasks = userTasks
+            let pendingTasks = 0;
+            let completedTasks = 0;
+            let inProgressTasks = 0;
+            let overdueTasks = 0;
+
+            const priorityLevels = {
+                  Low: 0,
+                  Medium: 0,
+                  High: 0,
+            };
+
+            userTasks.forEach(task => {
+                  switch (task.status) {
+                        case 'Pending':
+                              pendingTasks++;
+                              break;
+                        case 'Completed':
+                              completedTasks++;
+                              break;
+                        case 'In Progress':
+                        case 'InProgress':
+                              inProgressTasks++;
+                              break;
+                  }
+
+                  if (task.priority && priorityLevels.hasOwnProperty(task.priority)) {
+                        priorityLevels[task.priority]++;
+                  }
+
+                  if (task.dueDate && task.status !== 'Completed') {
+                        const dueDate = new Date(task.dueDate);
+                        if (dueDate < now) {
+                              overdueTasks++;
+                        }
+                  }
+            });
+
+            const recentTasks = [...userTasks]
+                  .filter(task => task.createdAt)
                   .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-                  .slice(0, 10)
+                  .slice(0, 3)
                   .map(task => ({
                         id: task.id,
                         title: task.title,
@@ -325,22 +360,35 @@ const getUserDashboardData = async (req, res) => {
                         createdAt: task.createdAt,
                   }));
 
-            res.status(200).json({
+            const totalTasks = userTasks.length;
+
+            const response = {
                   statistics: {
                         totalTasks,
                         pendingTasks,
-                        inProgressTasks,
                         completedTasks,
                         overdueTasks,
                   },
-                  recentTasks
-            });
+                  charts: {
+                        taskDistribution: {
+                              Pending: pendingTasks,
+                              InProgress: inProgressTasks,
+                              Completed: completedTasks,
+                              All: totalTasks,
+                        },
+                        taskPriorityLevels: priorityLevels,
+                  },
+                  recentTasks,
+            };
+
+            res.status(200).json(response);
 
       } catch (error) {
-            console.error("Error fetching user dashboard data:", error);
-            res.status(500).json({ message: "Error fetching user dashboard data" });
+            console.error('Error in getUserDashboardData:', error);
+            res.status(500).json({ error: 'Failed to fetch dashboard data' });
       }
 };
+
 
 module.exports = {
       getTasks,

@@ -27,7 +27,7 @@ const Login = () => {
     try {
       setIsSendingCode(true);
       await axiosInstance.post(API_PATHS.USERS.CREATE_LOGIN_CODE, { email });
-      setMessage("✅ Login code has been sent to your email!");
+      setMessage("Login code has been sent to your email!");
     } catch (error) {
       console.error(error);
       setError("Failed to send login code. Please try again later.");

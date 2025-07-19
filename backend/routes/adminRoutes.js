@@ -6,12 +6,14 @@ const {
       createInviteByAdminCode
 } = require("../controllers/adminController");
 
+
+
 const router = express.Router();
 
 
 router.post("/create-access-code",  createNewAccessCode);
 router.post("/validate-access-code",  validateAccessCode);
-router.post("/invite-user-by-admin", createInviteByAdminCode)
+router.post("/invite-user-by-admin", authMiddleware, adminRoleMiddleware ,createInviteByAdminCode)
 
 
 module.exports = router;

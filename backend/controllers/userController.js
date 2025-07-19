@@ -31,10 +31,20 @@ const validateLoginByEmailCode = async (req, res) => {
                   return res.status(400).json({ message: 'Invalid code' });
             }
             const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-            await User.update(user.id, { loginByEmailCode: null });
+            await User.update(user.id, { loginByEmailCode: "" });
             res.json({ message: 'Login successful', user: { ...user, token } });
       } catch (error) {
             console.error('Error validating login code:', error);
+            res.status(500).json({ message: 'Internal server error' });
+      }
+};
+
+const getAllUsers = async (req, res) => {
+      try {
+            const users = await User.findAll();
+            res.json(users);
+      } catch (error) {
+            console.error('Error fetching all users:', error);
             res.status(500).json({ message: 'Internal server error' });
       }
 };
@@ -110,5 +120,6 @@ module.exports = {
       deleteUser,
       validateInviteByAdminCode,
       createLoginByEmailCode,
-      validateLoginByEmailCode
+      validateLoginByEmailCode,
+      getAllUsers,
 };

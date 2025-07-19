@@ -34,7 +34,7 @@ export const SIDE_MENU_DATA = [
 
             icon: LuClipboardCheck,
 
-            path: "/admin/tasks",
+            path: "/admin/manage-tasks",
 
       },
 
@@ -57,13 +57,25 @@ export const SIDE_MENU_DATA = [
 
             icon: LuUsers,
 
-            path: "/admin/users",
+            path: "/admin/manage-users",
 
       },
 
       {
 
             id: "05",
+
+            label: "Message",
+
+            icon: LuUsers,
+
+            path: "/message",
+
+      },
+
+      {
+
+            id: "06",
 
             label: "Logout",
 
@@ -97,13 +109,24 @@ export const SIDE_MENU_USER_DATA = [
 
             icon: LuClipboardCheck,
 
-            path: "/user/tasks",
+            path: "/user/my-tasks",
+
+      },
+      {
+
+            id: "05",
+
+            label: "Message",
+
+            icon: LuUsers,
+
+            path: "/message",
 
       },
 
       {
 
-            id: "05",
+            id: "06",
 
             label: "Logout",
 

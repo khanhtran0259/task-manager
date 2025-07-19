@@ -21,6 +21,6 @@ router.post("/", authMiddleware, adminRoleMiddleware, createTask);
 router.put("/:id", authMiddleware, updateTask);
 router.delete("/:id", authMiddleware, adminRoleMiddleware, deleteTask);
 router.put("/status/:id", authMiddleware, updateTaskStatus);
-router.put("/:id/todo", authMiddleware, adminRoleMiddleware, updateTaskTodo);
+router.put("/:id/todo", authMiddleware, updateTaskTodo);
 
 module.exports = router;
